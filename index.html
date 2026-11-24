@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is RayCrafter? · RayCrafter docs</title>
+<meta name="description" content="RayCrafter is simple, cross-platform software for ray tracing with off-the-shelf lenses.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html" class="here">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">What is RayCrafter?</h2>
+<p class="lead">RayCrafter is simple software for tracing rays through optical systems built from off-the-shelf
+parts. You pick lenses from a catalogue, drop them on an optical axis, drag them around, and watch the
+result update as you move them.</p>
+<figure><a href="img/main-window.png" title="Open full size"><img src="img/main-window.png" alt="The RayCrafter window: a side view of two lenses with rays, and spot, MTF and field curvature plots below"></a><figcaption>The RayCrafter window. Top: the lenses and rays. Bottom: controls, then the spot diagram, MTF and field curvature.</figcaption></figure>
+
+<div class="note warn"><p><b>Very early stages of development.</b> RayCrafter is pre-alpha. It has bugs, features are
+missing, and anything may change, including file formats. Please check results against other tools before you
+rely on them. See <a href="known-problems.html">known problems</a>.</p></div>
+
+<h2>What it is</h2>
+<ul>
+  <li><b>Built around real, off-the-shelf lenses.</b> The full Thorlabs catalogue (spherical lenses, achromats,
+      air-spaced doublets, triplets and matched pairs) is built in, plus ideal (paraxial) lenses with a focal length you choose.</li>
+  <li><b>Not surface based.</b> You do not enter radii, thicknesses and glasses one surface at a time. You place whole lenses.</li>
+  <li><b>Not lens design.</b> RayCrafter does not optimise or invent lenses. It helps you work out how a set of lenses
+      you could buy will behave together: spacing, focus, aberrations, image quality.</li>
+  <li><b>Easy to use.</b> Drag lenses, flip them, make Plossl pairs, add beams (fields) with their own width, angle,
+      vergence, offset and wavelength. Plots update live.</li>
+  <li><b>Cross platform.</b> Runs on Windows, macOS and Linux.</li>
+  <li><b>Exports.</b> Save and load Zemax <code>.zmx</code> files and write an HTML report.</li>
+</ul>
+
+<h2>Built on Optiland</h2>
+<p>The ray tracing itself is done by <a href="https://github.com/HarrisonKramer/optiland">Optiland</a>, an open-source
+Python optical design library. RayCrafter is a simple front end for it, aimed at people who want to
+build and understand a lens system rather than design one from scratch.</p>
+
+<h2>Where next</h2>
+<ul>
+  <li><a href="install.html">Install and start RayCrafter</a>, with step-by-step instructions for Windows and Mac.</li>
+  <li><a href="tour.html">A tour</a> of what is on the screen.</li>
+  <li><a href="known-problems.html">Known problems</a>.</li>
+</ul>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>

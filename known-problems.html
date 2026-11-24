@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Known problems · RayCrafter docs</title>
+<meta name="description" content="Known problems with RayCrafter, taken from the project's issue tracker.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="known-problems.html" class="here">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">Known problems</h2>
+<p class="lead">RayCrafter is pre-alpha. These are the known problems at the time of writing (v0.0.2); the current list
+is on GitHub under the
+<a href="https://github.com/raycrafter-optical-design/raycrafter/issues?q=is%3Aissue+state%3Aopen+label%3A%22known+problem%22">known problem</a> label.</p>
+
+<h2>Saving to Zemax</h2>
+<ul class="problems">
+  <li><b>Saved ZMX files look wrong when opened in Zemax.</b> Even a single achromat appears with very thick, elongated
+      surfaces. Do not rely on exported files looking right in Zemax yet. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/9">#9</a></li>
+  <li><b>Fields do not survive a save and load.</b> A ZMX file holds one aperture, one object distance, and a list of angles
+      and wavelengths, so RayCrafter's per-field widths, vergences, offsets and colours are lost, and the fields that come back are not the ones saved.
+      Loading shows a dialog listing the simplifications. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/11">#11</a></li>
+  <li><b>Plossl pairs come back as two separate lenses.</b> The optics are right, but dragging one lens no longer moves the other.
+      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/12">#12</a></li>
+</ul>
+
+<h2>Accuracy of the analysis</h2>
+<ul class="problems">
+  <li><b>The MTF ignores a field's offset.</b> Spot diagrams and ray fans include the offset; the MTF is calculated as if it were 0.
+      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/10">#10</a></li>
+  <li><b>Side view draws some totally internally reflected rays wrongly.</b> They are drawn running on to the lens edge rather than stopping.
+      This affects the drawing only. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/16">#16</a></li>
+</ul>
+
+<h2>Internal issues</h2>
+<p>These are about the code rather than what you see, but they may affect speed or reliability.</p>
+<ul class="problems">
+  <li><b>Extra work while editing fields.</b> Holding an arrow on a field-window spin box makes updates roughly twice as slow as needed.
+      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/13">#13</a></li>
+  <li><b>MTF workaround for an Optiland error.</b> The code that catches an Optiland error could hide other errors.
+      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/14">#14</a></li>
+  <li><b>Unsaved-change tracking is in the interface, not the core model</b>, so scripts cannot ask whether a design is saved.
+      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/15">#15</a></li>
+</ul>
+
+<h2>Reporting a problem</h2>
+<p>Please <a href="https://github.com/raycrafter-optical-design/raycrafter/issues">open an issue</a> with what you did, what you expected, and what happened.</p>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>

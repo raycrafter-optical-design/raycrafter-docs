@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install and start · RayCrafter docs</title>
+<meta name="description" content="How to install uv on Windows and Mac and start RayCrafter with uvx raycrafter.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html" class="here">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">Install and start</h2>
+<p class="lead">You do not need to know Python. You install one small tool, called <b>uv</b>, and then a single
+command downloads and starts RayCrafter. Do the uv step once; after that, starting RayCrafter is one line.</p>
+
+<h2 id="mac">On a Mac</h2>
+<ol class="steps">
+  <li>Open <b>Terminal</b>. Press <b>Cmd + Space</b>, type <code>Terminal</code> and press <b>Return</b>.</li>
+  <li>Copy the line below, paste it into the Terminal window and press <b>Return</b>:
+<pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+  It takes a few seconds and prints a message saying uv was installed.</li>
+  <li><b>Close the Terminal window and open a new one.</b> This is needed so the Mac finds the new tool.</li>
+  <li>Check it worked by typing <code>uv --version</code> and pressing Return. You should see a version number.</li>
+</ol>
+
+<h2 id="windows">On Windows</h2>
+<ol class="steps">
+  <li>Open <b>PowerShell</b>. Click the Start button, type <code>PowerShell</code> and press <b>Enter</b>.
+      (Administrator rights are not needed.)</li>
+  <li>Copy the line below, paste it into the window (right-click pastes in PowerShell) and press <b>Enter</b>:
+<pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre>
+  </li>
+  <li><b>Close PowerShell and open a new one.</b> This is needed so Windows finds the new tool.</li>
+  <li>Check it worked by typing <code>uv --version</code> and pressing Enter. You should see a version number.</li>
+</ol>
+<p>If your organisation blocks this, uv can also be installed with <code>winget install --id=astral-sh.uv -e</code>,
+or ask your IT support. More options are in the <a href="https://docs.astral.sh/uv/getting-started/installation/">uv installation guide</a>.</p>
+
+<h2 id="start">Start RayCrafter</h2>
+<p>In a Terminal (Mac) or PowerShell (Windows) window, type:</p>
+<pre><code>uvx raycrafter</code></pre>
+<p>and press Return. The first time, uv downloads RayCrafter and everything it needs, including a suitable
+version of Python. That can take a minute or two. Messages appear in the window while RayCrafter loads, and then the
+RayCrafter window opens.</p>
+
+<div class="note"><p><b>The first run can be slow.</b> The first time rays are traced, RayCrafter may spend several minutes
+compiling its maths code. It tells you when this is happening. The result is saved, so later starts are quick.</p></div>
+
+<p>To start it again later, open a new Terminal or PowerShell window and type <code>uvx raycrafter</code> again.
+To make sure you have the newest release, use <code>uvx raycrafter@latest</code>. To stop RayCrafter from the
+terminal, press <b>Ctrl+C</b> in that window.</p>
+
+<h2>If something goes wrong</h2>
+<ul>
+  <li><b>"uv" or "uvx" is not recognised / command not found.</b> You probably did not open a <i>new</i> window after installing. Close it and open another.</li>
+  <li><b>Something else.</b> Please <a href="https://github.com/raycrafter-optical-design/raycrafter/issues">open an issue</a>
+      and include the text printed in the window.</li>
+</ul>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>
