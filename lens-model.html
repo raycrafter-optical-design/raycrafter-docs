@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How lenses work, compared with Zemax · RayCrafter docs</title>
+<meta name="description" content="RayCrafter blocks rays at every lens rim; Zemax only at surfaces with an aperture. A design choice, and what it means.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="lens-model.html" class="here">How lenses work (vs Zemax)</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">How lenses work, compared with Zemax</h2>
+<p class="lead">RayCrafter is built around <b>physical lenses with a size</b>, where Zemax is built around a list of
+<b>surfaces with optional apertures</b>. This is a design choice that runs through the whole program, not just file
+loading. It makes sense for the kind of design RayCrafter is for (off-the-shelf lenses on a bench), and we may change it
+later. This page explains it, because it is the main reason a design can give different results here and in Zemax.</p>
+
+<h2 id="model">The design choice</h2>
+<ul class="problems">
+  <li><b>Every lens has a rim, and the rim blocks rays.</b> Whatever you do in RayCrafter (pick a catalogue lens, drag it,
+      load a file), a ray that reaches a lens outside its clear diameter is lost. The side view draws each lens at that
+      size, so what you see is what is traced.</li>
+  <li><b>Zemax does not work this way.</b> It blocks rays only at surfaces that have an aperture (circular, floating or
+      rectangular). A surface's semi-diameter (<code>DIAM</code>) only sets the size it is <em>drawn</em>; rays outside it
+      still pass. A surface with no aperture blocks nothing, however far from the axis a ray is.</li>
+  <li><b>The consequence.</b> Take a beam wider than a lens whose Zemax surfaces have no aperture. Zemax passes the whole
+      beam. RayCrafter clips it at the lens rim, so spots, MTF and throughput can differ. The reverse does not happen: a
+      lens with an aperture is clipped the same way in both.</li>
+  <li><b>Why.</b> Real lenses have edges, and clipping by the real edge is usually what a bench builder needs to know.
+      A lens's drawn size is often its real size (for example the back aperture of a microscope objective), so silently
+      widening it to match Zemax would hide real clipping.</li>
+</ul>
+
+<h2 id="size">Where a lens's size comes from</h2>
+<p>A catalogue lens has its catalogue size. For a lens loaded from a file, the size is, in order: the aperture in the
+file, the catalogue size if the lens is recognised, or the drawn semi-diameter (<code>DIAM</code>). RayCrafter does not
+widen a lens to match Zemax; after loading, it adds a note for each lens that now blocks rays Zemax lets through.</p>
+
+<h2 id="loading">What this means when loading a Zemax file</h2>
+<ul class="problems">
+  <li><b>Lenses are grouped from surfaces.</b> A lens is a run of surfaces with glass between them, ending at the first
+      surface followed by air. Each glass lens is looked up in the lens catalogue, so a vendor lens comes back with its
+      part number and catalogue data. A lens that is not found keeps its prescription and is named
+      &ldquo;Imported lens N&rdquo;. A paraxial surface becomes a paraxial lens.</li>
+  <li><b>Rectangular apertures</b> (such as a beamsplitter cube) are replaced by the round aperture that fits inside
+      them. A note says so.</li>
+  <li><b>Apertures on surfaces in air</b> (not part of a lens) cannot be modelled and are left out, with a note.</li>
+</ul>
+
+<h2 id="fields">Fields</h2>
+<p>Zemax gives every field the same entrance pupil and object, and pairs every field angle with every wavelength.
+RayCrafter makes one field for each field angle at the primary wavelength, and one on-axis field for each other
+wavelength. With several angles, each is drawn in its own colour, as in Zemax. When the stop is in air in front of
+the first lens (a scan mirror, for example), each beam's chief ray passes through the centre of the stop; otherwise the
+beams are centred on the first lens. Field x coordinates are dropped, because RayCrafter tilts beams in y only.</p>
+
+<h2 id="unsupported">Not supported yet</h2>
+<p>Aspheres, conics, mirrors, tilts and decentres are not supported: a file that contains them does not load.
+Glasses without a catalogue name (model glasses) are reported in a note.</p>
+
+<h2 id="saving">Saving</h2>
+<p>A ZMX file cannot hold everything RayCrafter does; see <a href="known-problems.html">known problems</a>.</p>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>
