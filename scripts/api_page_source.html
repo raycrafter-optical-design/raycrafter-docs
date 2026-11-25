@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python API · RayCrafter docs</title>
+<meta name="description" content="Script RayCrafter from Python: worked IPython examples of the Bench API.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="python-api.html" class="here">Python API</a>
+  <a href="lens-model.html">How lenses work (vs Zemax)</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">Python API</h2>
+<p class="lead">Everything the window does can be scripted with one object, <code>Bench</code>: a row of lenses on an
+axis, some beams and an image plane.</p>
+
+<div class="note warn"><p><b>The API will change.</b> It is on the <code>main</code> branch (25 November 2026) and may not yet be in the
+PyPI release. RayCrafter is pre-alpha.</p></div>
+
+<p>Contents: <a href="#start">Start</a> · <a href="#catalogue">Find lenses</a> · <a href="#lenses">Place and move lenses</a> ·
+<a href="#fields">Fields</a> · <a href="#focus">Focus and summary</a> · <a href="#plots">Plots</a> · <a href="#data">Raw results</a> ·
+<a href="#sweeps">Sweeps</a> · <a href="#window">Drive the window</a> · <a href="#files">Files and reports</a> ·
+<a href="#errors">Errors</a> · <a href="#reference">Reference</a></p>
+
+<h2 id="start">Start</h2>
+<p>You need Python 3.12 or later. To get the current <code>main</code> branch, with IPython, into a new environment:</p>
+<pre><code>pip install ipython "git+https://github.com/raycrafter-optical-design/raycrafter@main"
+ipython</code></pre>
+<p>All the examples below are one session, run top to bottom. A plot call returns a matplotlib <code>Figure</code>, shown
+here under the command. In Jupyter, run <code>%matplotlib inline</code> first to see figures like this. In a terminal, save
+them with <code>.savefig("name.png")</code>.</p>
+
+<h3>Units and numbering</h3>
+<ul>
+  <li>Distances are in mm along the optical axis (z). Light travels towards larger z.</li>
+  <li>Angles are in degrees, vergence in dioptres (positive converging), wavelengths in nm.</li>
+  <li>Lenses are numbered from 0 along the axis, fields from 0 in the order added.</li>
+</ul>
+
+<h3>Make a bench</h3>
+<p><code>Bench()</code> starts like a new window, with one lens. <code>Bench(empty=True)</code> has none. Both are
+<em>headless</em>: no window is involved.</p>
+<ipython>
+from raycrafter import Bench
+
+Bench()
+
+bench = Bench(empty=True)
+
+bench
+</ipython>
+
+<h2 id="catalogue">Find lenses</h2>
+<p><code>search_lenses</code> filters the built-in catalogue. Results are sorted by absolute focal length.</p>
+<ipython>
+found = bench.search_lenses("AC254", min_focal_length_mm=49, max_focal_length_mm=101)
+
+for entry in found[:6]:
+    print(f"{entry.part_number:14} f = {entry.focal_length:6.1f} mm   {entry.coating}")
+
+negative = bench.search_lenses(max_focal_length_mm=-1, min_diameter_mm=24, category="Achromats")
+
+[entry.part_number for entry in negative[:5]]
+
+entry = bench.catalog["AC254-100-A"]
+
+entry.focal_length, entry.clear_diameter_mm, entry.category, entry.family
+</ipython>
+
+<h2 id="lenses">Place and move lenses</h2>
+<p>Build a 2:1 beam reducer. Each call returns a <code>LensInfo</code> snapshot.</p>
+<ipython>
+bench.add_lens("AC254-100-A")
+
+bench.add_lens("AC254-050-A", front_z_mm=250)
+
+bench.plot("ray_diagram")
+#figure api-ray-diagram
+</ipython>
+<p><code>move_lens</code> behaves like a drag: lenses cannot overlap. Snapshots do not update, so read
+<code>bench.lenses</code> again after an edit.</p>
+<ipython>
+bench.move_lens(1, front_z_mm=245).front_z_mm
+
+bench.move_lens(1, front_z_mm=90).front_z_mm  # push it past the other lens: they swap
+
+[(lens.index, lens.part_number, lens.front_z_mm) for lens in bench.lenses]
+</ipython>
+<p>Flip and delete work by index. An ideal (paraxial) lens takes any focal length.</p>
+<ipython>
+bench = Bench(empty=True)
+
+bench.add_lens("LA1509-A")
+
+bench.flip_lens(0).flipped
+
+bench.add_paraxial_lens(150, front_z_mm=250).part_number
+
+bench.delete_lens(1)
+
+len(bench.lenses)
+</ipython>
+
+<h3>Plössl pairs</h3>
+<p>Two identical positive lenses that are close together can be snapped into a pair, which then moves as one.</p>
+<ipython>
+pair = Bench(empty=True)
+
+pair.add_lens("AC254-100-A");
+pair.add_lens("AC254-100-A");
+
+pair.make_plossl(0)
+
+[(lens.front_z_mm, lens.flipped, lens.plossl_group) for lens in pair.lenses]
+
+pair.plot("ray_diagram")
+#figure api-plossl
+
+pair.split_plossl(0)
+
+[lens.plossl_group for lens in pair.lenses]
+</ipython>
+
+<h2 id="fields">Fields (beams)</h2>
+<p><code>set_field</code> changes only what you pass. <code>add_field</code> copies the selected field, applies your
+changes and selects the new one.</p>
+<ipython>
+bench = Bench(empty=True)
+
+bench.add_lens("AC254-100-A");
+
+bench.set_field(0, diameter_mm=8, wavelength_nm=488)
+
+bench.add_field(angle_deg=2, colour="#d62728");
+
+bench.add_field(angle_deg=-3, vergence_dioptres=0, offset_mm=1, colour="wavelength");
+
+[(f.index, f.angle_deg, f.offset_mm, f.colour, f.selected) for f in bench.fields]
+
+bench.remove_fields([2])
+
+bench.select_field(0)
+
+bench.selected_field_index
+</ipython>
+
+<h2 id="focus">Focus and summary</h2>
+<p><code>autofocus</code> moves the image plane to the smallest RMS spot of the selected field and returns its z.</p>
+<ipython>
+bench.autofocus()
+
+bench.summary()
+
+bench.set_image_z(bench.image_z_mm + 0.5)
+
+bench.summary().rms_spot_radius_um
+
+bench.autofocus();
+</ipython>
+
+<h2 id="plots">Plots</h2>
+<p><code>plot(kind)</code> draws any of six figures. The ray and spot diagrams show every field. The others show the
+selected field, or the one given by <code>field_index</code>.</p>
+<ipython>
+bench.plot("ray_diagram")
+#figure api-fields-rays
+
+bench.plot("spot_diagram")
+#figure api-spot
+
+bench.plot("through_focus")
+#figure api-through-focus
+
+bench.plot("mtf")
+#figure api-mtf
+
+bench.plot("ray_fan", field_index=1)
+#figure api-ray-fan
+
+bench.plot("field_curvature")
+#figure api-field-curvature
+</ipython>
+
+<h2 id="data">Raw results as NumPy arrays</h2>
+<p>Each analysis also returns its numbers. Lengths here are in mm unless the name says otherwise.</p>
+<ipython>
+spot = bench.spots()[0]
+
+spot.x.shape, spot.rms_radius * 1000  # rays; RMS radius in µm
+
+tf = bench.through_focus()
+
+tf.offsets.shape, tf.best_offset, tf.airy_radius
+
+mtf = bench.mtf()
+
+import numpy as np
+
+for f in (10, 25, 50):  # cycles/mm
+    t = np.interp(f, mtf.frequency, mtf.tangential)
+    s = np.interp(f, mtf.frequency, mtf.sagittal)
+    print(f"{f:3} cyc/mm   T = {t:.3f}   S = {s:.3f}")
+
+fan = bench.ray_fan(field_index=1)
+
+fan.pupil.shape, np.nanmax(np.abs(fan.tangential_error))
+
+curvature = bench.field_curvature()
+
+curvature.angles
+
+curvature.tangential_shift.round(2)
+</ipython>
+<p>Plot them however you like:</p>
+<ipython>
+from matplotlib.figure import Figure
+
+fig = Figure(figsize=(7, 3.5))
+ax = fig.subplots()
+for i, name in enumerate(["on axis", "2 deg"]):
+    result = bench.through_focus(field_index=i)
+    ax.plot(result.offsets, result.rms_current * 1000, label=name)
+ax.set(xlabel="image plane offset (mm)", ylabel="RMS spot radius (µm)")
+ax.legend()
+fig
+#figure api-custom-through-focus
+</ipython>
+<p><code>bench.state()</code> returns a copy of the complete design, every surface included, for use with
+<code>raycrafter.core.analysis</code>. Changing the copy does not change the bench.</p>
+
+<h2 id="sweeps">Sweeps</h2>
+<p>Scripting pays off when you compare many configurations. Which way round should a plano-convex lens go?</p>
+<ipython>
+for part in ("LA1509-A", "AC254-100-A"):
+    test = Bench(empty=True)
+    test.add_lens(part)
+    for _ in range(2):
+        test.autofocus()
+        s = test.summary()
+        print(f"{part:12} flipped={test.lenses[0].flipped!s:5}  "
+              f"RMS = {s.rms_spot_radius_um[0]:7.2f} µm   Airy = {s.airy_radius_um[0]:.2f} µm")
+        test.flip_lens(0)
+</ipython>
+<p>How does spot size grow with beam diameter?</p>
+<ipython>
+diameters = np.arange(2, 21, 2)
+
+curves = {}
+for part in ("LA1509-A", "AC254-100-A"):
+    test = Bench(empty=True)
+    test.add_lens(part)
+    rms = []
+    for d in diameters:
+        test.set_field(0, diameter_mm=d)
+        test.autofocus()
+        rms.append(test.summary().rms_spot_radius_um[0])
+    curves[part] = rms
+
+fig = Figure(figsize=(7, 3.5))
+ax = fig.subplots()
+for label, rms in curves.items():
+    ax.semilogy(diameters, rms, "o-", label=label)
+ax.set(xlabel="beam diameter (mm)", ylabel="RMS spot radius at best focus (µm)")
+ax.legend()
+fig
+#figure api-sweep
+</ipython>
+
+<h2 id="window">Drive the open window</h2>
+<p>Start RayCrafter (<code>raycrafter</code> in another terminal), then use <code>Bench.connect()</code>. The methods are
+the same, but each edit happens in the window and it redraws. The script also sees changes you make by hand. The link
+only listens on your own computer. It is off if RayCrafter was started with <code>--no-agent-link</code>.</p>
+<ipython>
+live = Bench.connect()
+
+live
+
+live.is_connected
+
+live.new_design(discard_unsaved=True)
+
+live.add_lens("AC254-100-A");
+live.add_lens("AC254-050-A", front_z_mm=180);
+live.add_field(angle_deg=1.5, colour="#d62728");
+live.select_field(0)
+live.autofocus()
+#screenshot api-window
+</ipython>
+<p>Move a lens from the script and the window follows:</p>
+<ipython>
+live.move_lens(1, front_z_mm=140);
+
+live.autofocus()
+#screenshot api-window-moved
+</ipython>
+<h3>Which index is which?</h3>
+<p>The <b>Bench</b> list in the window shows every lens and field with the index the API uses. Selecting a row highlights
+it in the side view. Here lens 1 is selected.</p>
+<ipython>
+#bench-viewer
+[(lens.index, lens.part_number) for lens in live.lenses]
+#screenshot api-viewer
+</ipython>
+
+<h2 id="files">Files and reports</h2>
+<p>Save and load Zemax <code>.zmx</code> files, and write the HTML report. <code>load_zmx</code> returns a list of notes on
+anything RayCrafter simplified. See <a href="lens-model.html">how lenses differ from Zemax</a>.</p>
+<ipython>
+bench.has_unsaved_changes
+
+bench.save_zmx("reducer.zmx")
+
+bench.has_unsaved_changes
+
+reloaded = Bench.from_zmx("reducer.zmx")
+
+[lens.part_number for lens in reloaded.lenses]
+
+reloaded.load_zmx("reducer.zmx", discard_unsaved=True)
+
+bench.write_report("design.html")  # add open_in_browser=True to view it
+</ipython>
+
+<h2 id="errors">Errors</h2>
+<p>A request that makes no sense raises <code>ValueError</code> with an explanation. <code>Bench.connect()</code> raises
+<code>ConnectionError</code> if no window answers.</p>
+<ipython>
+bench.add_lens("AC999-000-Z")  # raises
+
+bench.flip_lens(7)  # raises
+
+bench.add_lens("LA1509-A");
+
+bench.new_design()  # raises
+</ipython>
+
+<h2 id="reference">Reference</h2>
+<p>The full docstrings are in
+<a href="https://github.com/raycrafter-optical-design/raycrafter/blob/main/raycrafter/api.py"><code>raycrafter/api.py</code></a>,
+or type <code>bench.add_lens?</code> in IPython. Arguments in [brackets] are optional.</p>
+<div class="table"><table>
+<tr><th>Create</th><th></th></tr>
+<tr><td><code>Bench([empty])</code></td><td>Headless bench</td></tr>
+<tr><td><code>Bench.connect([endpoint_path])</code></td><td>Drive the open window</td></tr>
+<tr><td><code>Bench.from_zmx(file_path)</code></td><td>Headless bench from a file</td></tr>
+<tr><th>Read</th><th></th></tr>
+<tr><td><code>catalog</code>, <code>search_lenses([query, min_focal_length_mm, max_focal_length_mm, min_diameter_mm, category])</code></td><td>Catalogue entries</td></tr>
+<tr><td><code>lenses</code>, <code>fields</code></td><td>Lists of <code>LensInfo</code>, <code>FieldInfo</code></td></tr>
+<tr><td><code>image_z_mm</code>, <code>selected_field_index</code></td><td>Image plane, selected field</td></tr>
+<tr><td><code>is_connected</code>, <code>has_unsaved_changes</code></td><td>Booleans</td></tr>
+<tr><td><code>state()</code></td><td>Copy of the whole design</td></tr>
+<tr><th>Lenses</th><th></th></tr>
+<tr><td><code>add_lens(part_number, [front_z_mm])</code></td><td>Add a catalogue lens</td></tr>
+<tr><td><code>add_paraxial_lens(focal_length_mm, [front_z_mm])</code></td><td>Add an ideal thin lens</td></tr>
+<tr><td><code>move_lens(lens_index, front_z_mm)</code></td><td>Move, as by dragging</td></tr>
+<tr><td><code>flip_lens(lens_index)</code>, <code>delete_lens(lens_index)</code></td><td>Turn round, remove</td></tr>
+<tr><td><code>make_plossl(lens_index)</code>, <code>split_plossl(lens_index)</code></td><td>Pair, unpair</td></tr>
+<tr><th>Fields and image plane</th><th></th></tr>
+<tr><td><code>set_field(field_index, [diameter_mm, angle_deg, vergence_dioptres, offset_mm, wavelength_nm, colour])</code></td><td>Change a field</td></tr>
+<tr><td><code>add_field([...])</code></td><td>Copy the selected field, with changes</td></tr>
+<tr><td><code>remove_fields(field_indices)</code>, <code>select_field(field_index)</code></td><td>Remove, select</td></tr>
+<tr><td><code>set_image_z(image_z_mm)</code>, <code>autofocus()</code></td><td>Place the image plane</td></tr>
+<tr><th>Analyses</th><th></th></tr>
+<tr><td><code>summary()</code></td><td><code>DesignSummary</code></td></tr>
+<tr><td><code>spots()</code></td><td>One spot result per field</td></tr>
+<tr><td><code>through_focus([field_index])</code>, <code>mtf([field_index])</code>, <code>ray_fan([field_index])</code>, <code>field_curvature([field_index])</code></td><td>Result arrays</td></tr>
+<tr><td><code>plot(kind, [field_index])</code></td><td>matplotlib <code>Figure</code></td></tr>
+<tr><th>Files</th><th></th></tr>
+<tr><td><code>new_design([discard_unsaved])</code></td><td>Start again</td></tr>
+<tr><td><code>load_zmx(file_path, [discard_unsaved])</code>, <code>save_zmx(file_path)</code></td><td>Zemax files</td></tr>
+<tr><td><code>write_report(file_path, [open_in_browser])</code></td><td>HTML report</td></tr>
+</table></div>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>
