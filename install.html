@@ -66,6 +66,14 @@ compiling its maths code. It tells you when this is happening. The result is sav
 To make sure you have the newest release, use <code>uvx raycrafter@latest</code>. To stop RayCrafter from the
 terminal, press <b>Ctrl+C</b> in that window.</p>
 
+<h2 id="main">Try the newest version (from GitHub)</h2>
+<p>The version on PyPI is the released one. The <code>main</code> branch on GitHub can have newer changes that are not
+released yet. To run that version instead, type this in a Terminal (Mac) or PowerShell (Windows) window and press Return:</p>
+<pre><code>uvx --from git+https://github.com/raycrafter-optical-design/raycrafter@main raycrafter</code></pre>
+<p>uv downloads the current code from GitHub and starts it, just as above. Expect behaviour to differ from the
+released version. This needs <b>git</b> on your computer. On a Mac, if git is missing, a window may offer to install
+the Command Line Tools; accept, then try again.</p>
+
 <h2>If something goes wrong</h2>
 <ul>
   <li><b>"uv" or "uvx" is not recognised / command not found.</b> You probably did not open a <i>new</i> window after installing. Close it and open another.</li>
