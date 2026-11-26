@@ -18,6 +18,18 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html" class="here">A tour</a>
+  <div class="sub">
+    <a href="tour.html#window">The window</a>
+    <a href="tour.html#lenses">Adding and moving lenses</a>
+    <a href="tour.html#gaps">Gaps and locks</a>
+    <a href="tour.html#assemblies">Assemblies and user parts</a>
+    <a href="tour.html#fields">Fields (beams)</a>
+    <a href="tour.html#source">The source plane</a>
+    <a href="tour.html#analysis">Analysis plots</a>
+    <a href="tour.html#bench">The Bench list</a>
+    <a href="tour.html#undo">Undo and redo</a>
+    <a href="tour.html#keys">Shortcuts</a>
+  </div>
   <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
   <a href="agents.html">AI agents</a>
@@ -31,68 +43,103 @@
 <h2 style="margin-top:10px">A tour</h2>
 <p class="lead">What is on the screen, and how to use it.</p>
 
-<p>Contents: <a href="#window">The window</a> · <a href="#lenses">Lenses</a> · <a href="#gaps">Gaps and locks</a> ·
-<a href="#assemblies">Assemblies and user parts</a> · <a href="#fields">Fields</a> · <a href="#source">The source plane</a> ·
-<a href="#analysis">Plots</a> · <a href="#bench">Bench list</a> · <a href="#undo">Undo</a> · <a href="#keys">Shortcuts</a></p>
-
 <h2 id="window">The window</h2>
+<h3 id="side-view">Side view, controls and plots</h3>
 <p>The top half is the <b>side view</b>: lenses on an optical axis, with rays travelling left to right, a brown dashed
 line for the source plane and a green dashed line for the image plane. The distances between them are written along the
 bottom. The lower row has the control panel on the left, then three groups of plots. A line along the bottom gives the
 image position, RMS spot size, focal length (EFL), back focal length, f-number and Airy radius.</p>
 <figure><a href="img/main-window.png" title="Open full size"><img src="img/main-window.png" alt="The main window with two achromats and two fields"></a><figcaption>Two achromatic doublets, with an on-axis beam (green) and a beam at 3° (red).</figcaption></figure>
+<h3 id="menus">Menus</h3>
 <p>A new window starts with one lens, an ACT508-200-A achromat. The <b>File</b> menu starts, opens and saves designs
 (see <a href="files.html">Files and reports</a>), <b>Edit</b> has Undo and Redo, and <b>Help</b> opens these pages.</p>
 
 
 <h2 id="lenses">Adding and moving lenses</h2>
+<h3 id="add-lens">Add a catalogue lens</h3>
 <ol class="steps">
   <li>Click <b>Add catalogue lens</b> to open the lens picker. Type part of a part number in the search box
       (for example <code>AC254</code>), or filter by coating and focal length. Select a lens and click <b>Insert</b>.</li>
   <li>Click on the axis to put the lens where you want it. <kbd>Esc</kbd> or right-click cancels.</li>
-  <li>Drag a lens along the axis; the plots follow. Drag it past its neighbour to swap their order.</li>
-  <li>Right-click a lens to flip or delete it.</li>
-  <li>For an ideal lens, set a focal length next to <b>Add paraxial lens</b> and click the button.</li>
-  <li><b>Autofocus</b> moves the image plane to the best-focus position; tick <b>Lock focus</b> to keep it there as you
-      change the design. You can also drag the green image line.</li>
 </ol>
 <figure class="small"><a href="img/lens-picker.png" title="Open full size"><img src="img/lens-picker.png" alt="The lens picker dialog filtered to AC254-1 achromats"></a><figcaption>The lens picker, searching for AC254-1.</figcaption></figure>
+
+<h3 id="paraxial">Add an ideal (paraxial) lens</h3>
+<p>Set a focal length next to <b>Add paraxial lens</b>, click the button, then click on the axis. A negative focal
+length gives a diverging lens.</p>
+
+<h3 id="move-lens">Move, flip and delete</h3>
+<ul>
+  <li>Drag a lens along the axis; the plots follow. Drag it past its neighbour to swap their order.</li>
+  <li>Right-click a lens to flip or delete it.</li>
+</ul>
+
+<h3 id="focus">Focus</h3>
+<p><b>Autofocus</b> moves the image plane to the best-focus position. Tick <b>Lock focus</b> to keep it there as you
+change the design, as long as that focus is within the side view. You can also drag the green image line.</p>
 
 
 <h2 id="gaps">Gaps and locks</h2>
 <p>A <b>gap</b> is the air distance along the axis, from the back of one lens to the front of the next, or from the last
 lens to the image plane.</p>
-<ul>
-  <li><b>Type a gap:</b> click its label, enter the distance and press Return. All later lenses and the image plane shift
-      together, so no other gap changes. A value that would make surfaces overlap, or put the image plane less than
-      1&nbsp;mm behind the last lens, is refused and the smallest allowed value is shown.</li>
-  <li><b>Lock a gap:</b> right-click its label and choose <b>Lock gap</b>. A locked label has a box round it. Lenses joined
-      by locked gaps move as one.</li>
-  <li><b>Lock the gap to the image plane</b> and the image plane moves with the last lens. Autofocus and <b>Lock focus</b>
-      are then unavailable. Likewise, while Lock focus is ticked, that gap cannot be typed or locked.</li>
-</ul>
+
+<h3 id="type-gap">Type a gap</h3>
+<p>Click the gap&rsquo;s label, enter the distance and press Return. All later lenses and the image plane shift
+together, so no other gap changes. A value that would make surfaces overlap, or put the image plane less than
+1&nbsp;mm behind the last lens, is refused and the smallest allowed value is shown.</p>
+
+<h3 id="lock-gap">Lock a gap</h3>
+<p>Right-click the gap&rsquo;s label and choose <b>Lock gap</b>, or <b>Unlock gap</b> to release it. A locked label has
+a box round it. Lenses joined by locked gaps move as one.</p>
 <figure><a href="img/gaps.png" title="Open full size"><img src="img/gaps.png" alt="Side view with a source plane, a single lens, a Plossl pair and locked gaps"></a><figcaption>A source plane 60&nbsp;mm in front of the first lens, and a Plossl pair (purple). The boxed gaps are locked.</figcaption></figure>
+
+<h3 id="lock-image-gap">Lock the gap to the image plane</h3>
+<p>The image plane then moves with the last lens. Autofocus and <b>Lock focus</b> are unavailable. Likewise, while
+Lock focus is ticked, that gap cannot be typed or locked.</p>
+
+<h3 id="locks-add-delete">Locked gaps when adding or deleting lenses</h3>
+<ul>
+  <li>A new lens cannot go into a locked gap. While you place it, it jumps to the nearest space where it fits, and is
+      drawn red if it fits nowhere.</li>
+  <li>While the gap to the image plane is locked, a new lens cannot go behind the last lens.</li>
+  <li>Deleting a lens leaves the new, wider gap unlocked. The exception is the gap from the
+      <a href="#source">source plane</a>: if it was locked, it stays locked at the same distance from whichever lens is
+      now first.</li>
+</ul>
 
 
 <h2 id="assemblies">Assemblies and user parts</h2>
-<p>An <b>assembly</b> is a group of neighbouring lenses that moves and flips as one. It is drawn in purple.</p>
+<p>An <b>assembly</b> is a group of neighbouring lenses that moves and flips as one. It is drawn in purple, and
+pointing at one of its lenses shows the assembly&rsquo;s name.</p>
+
+<h3 id="make-assembly">Make an assembly</h3>
 <ol class="steps">
   <li>Put the lenses where you want them relative to each other.</li>
-  <li>Lock the gaps between them.</li>
+  <li><a href="#lock-gap">Lock the gaps</a> between them.</li>
   <li>Right-click one of the lenses and choose <b>Make assembly</b>.</li>
 </ol>
+
+<h3 id="flip-assembly">Flip, split or delete</h3>
 <ul>
   <li><kbd>F</kbd>, or <b>Flip assembly</b>, turns the whole group round: the order of the lenses is reversed and each one
       is flipped.</li>
-  <li>The gaps inside an assembly are fixed. <b>Split assembly</b> releases the lenses so you can change them. Deleting
-      one of its lenses also dissolves it.</li>
-  <li><b>Save as user part</b> stores the assembly. The <b>Add user part</b> button then places a copy of it in any
-      design. See <a href="files.html#parts">where parts are kept</a>.</li>
+  <li>The gaps inside an assembly are fixed. <b>Split assembly</b> releases the lenses so you can change them.</li>
+  <li>Deleting one of its lenses also dissolves it. The other gaps that were inside it stay locked.</li>
 </ul>
-<h3>Plossl pairs</h3>
+
+<h3 id="user-parts">User parts</h3>
+<ul>
+  <li>Right-click an assembly and choose <b>Save as user part</b> to store it under a name. RayCrafter asks before
+      replacing a part of the same name.</li>
+  <li>To use it, click <b>Add user part</b>, choose the part and click on the axis. A copy is placed in your design as an
+      assembly. Parts are available in every design: see <a href="files.html#parts">where they are kept</a>.</li>
+</ul>
+
+<h3 id="plossl">Plossl pairs</h3>
 <p>Put two identical positive catalogue lenses next to each other, right-click one and choose <b>Make Plossl</b>. The two
-are turned to face each other and set 1&nbsp;mm apart, and become an assembly. The option is greyed out if the neighbour
-is a different lens or is too far away (more than about two lens thicknesses).</p>
+are turned to face each other, set 1&nbsp;mm apart and made into an assembly, and the design is refocused (unless the
+gap to the image plane is locked). The option is greyed out if the neighbour is a different lens or is too far away
+(more than about two lens thicknesses).</p>
 
 
 <h2 id="fields">Fields (beams)</h2>
@@ -106,15 +153,19 @@ Autofocus use the selected field.</p>
 <h2 id="source">The source plane</h2>
 <p>A field&rsquo;s width, offset, angle and vergence are those it has at the <b>source plane</b>, which can stand for a
 light source, a scan mirror or a stop. By default it sits at the front of the first lens and moves with it.</p>
+
+<h3 id="move-source">Move the source plane</h3>
 <ul>
   <li>To place it elsewhere, right-click the <b>source</b> label and unlock it. Then drag the dashed line, or click the
       gap in front of the first lens and type the distance.</li>
   <li>Dragging the line moves only the source plane. Typing the gap leaves the source plane where it is and moves the
       lenses and image plane.</li>
   <li>While unlocked, the source plane stays put when lenses move, and no lens can be moved in front of it.</li>
-  <li><i>Offset</i> is the height of the beam&rsquo;s centre at the source plane. With an offset of 0, beams at every angle
-      pass through the axis there, as at a scan mirror.</li>
 </ul>
+
+<h3 id="offset">Beam offset</h3>
+<p><i>Offset</i> is the height of the beam&rsquo;s centre at the source plane. With an offset of 0, beams at every angle
+pass through the axis there, as at a scan mirror.</p>
 
 
 <h2 id="analysis">Analysis plots</h2>
@@ -139,8 +190,13 @@ use. They start at 0, so the field window&rsquo;s &ldquo;Field 1&rdquo; is field
 
 
 <h2 id="undo">Undo and redo</h2>
-<p>Use the <b>Edit</b> menu or the usual keys. One action, such as a whole drag or a typed value, is one step. Starting,
-opening or importing a design clears the history.</p>
+<p>Use the <b>Edit</b> menu or the <a href="#keys">usual keys</a>.</p>
+<ul>
+  <li>One action, such as a whole drag or a typed value, is one step. Up to 200 steps are kept.</li>
+  <li>Selecting a different field is not a step.</li>
+  <li>Changes an <a href="agents.html">AI agent</a> makes to the open window can be undone too.</li>
+  <li>Starting, opening or importing a design clears the history.</li>
+</ul>
 
 
 <h2 id="keys">Shortcuts</h2>
@@ -149,7 +205,7 @@ opening or importing a design clears the history.</p>
 <tr><td><kbd>Delete</kbd> or <kbd>Backspace</kbd></td><td>Delete the lens under the pointer</td></tr>
 <tr><td><kbd>Esc</kbd></td><td>Cancel placing a lens</td></tr>
 <tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Z</kbd></td><td>Undo</td></tr>
-<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></td><td>Redo</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></td><td>Redo (also <kbd>Ctrl</kbd> + <kbd>Y</kbd> on Windows)</td></tr>
 <tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>N</kbd>, <kbd>O</kbd>, <kbd>S</kbd></td><td>New, open, save</td></tr>
 </table></div>
 </main>
