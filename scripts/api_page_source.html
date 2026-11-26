@@ -18,7 +18,9 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html" class="here">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html">How lenses work (vs Zemax)</a>
   <a href="known-problems.html">Known problems</a>
   <b>Links</b>
@@ -27,21 +29,23 @@
 </nav>
 <main>
 <h2 style="margin-top:10px">Python API</h2>
-<p class="lead">Everything the window does can be scripted with one object, <code>Bench</code>: a row of lenses on an
-axis, some beams and an image plane.</p>
+<p class="lead">Everything the window does, apart from undo, can be scripted with one object, <code>Bench</code>: a row of
+lenses on an axis, some beams and an image plane.</p>
 
-<div class="note warn"><p><b>The API will change.</b> It is on the <code>main</code> branch (25 November 2026) and may not yet be in the
-PyPI release. RayCrafter is pre-alpha.</p></div>
+<div class="note warn"><p><b>The API will change.</b> It is new in version 0.0.4. RayCrafter is pre-alpha, and methods may be
+renamed without warning.</p></div>
 
 <p>Contents: <a href="#start">Start</a> · <a href="#catalogue">Find lenses</a> · <a href="#lenses">Place and move lenses</a> ·
+<a href="#gaps">Gaps and the source plane</a> · <a href="#assemblies">Assemblies and user parts</a> ·
 <a href="#fields">Fields</a> · <a href="#focus">Focus and summary</a> · <a href="#plots">Plots</a> · <a href="#data">Raw results</a> ·
 <a href="#sweeps">Sweeps</a> · <a href="#window">Drive the window</a> · <a href="#files">Files and reports</a> ·
 <a href="#errors">Errors</a> · <a href="#reference">Reference</a></p>
 
 <h2 id="start">Start</h2>
-<p>You need Python 3.12 or later. To get the current <code>main</code> branch, with IPython, into a new environment:</p>
-<pre><code>pip install ipython "git+https://github.com/raycrafter-optical-design/raycrafter@main"
+<p>You need Python 3.12 or later. To install RayCrafter, with IPython, into a new environment:</p>
+<pre><code>pip install ipython raycrafter
 ipython</code></pre>
+<p>Or, with uv and nothing to install: <code>uvx --with raycrafter ipython</code>.</p>
 <p>All the examples below are one session, run top to bottom. A plot call returns a matplotlib <code>Figure</code>, shown
 here under the command. In Jupyter, run <code>%matplotlib inline</code> first to see figures like this. In a terminal, save
 them with <code>.savefig("name.png")</code>.</p>
@@ -50,7 +54,8 @@ them with <code>.savefig("name.png")</code>.</p>
 <ul>
   <li>Distances are in mm along the optical axis (z). Light travels towards larger z.</li>
   <li>Angles are in degrees, vergence in dioptres (positive converging), wavelengths in nm.</li>
-  <li>Lenses are numbered from 0 along the axis, fields from 0 in the order added.</li>
+  <li>Lenses are numbered from 0 along the axis, fields from 0 in the order added. A lens&rsquo;s number changes if
+      another lens is added in front of it or the two swap places.</li>
 </ul>
 
 <h3>Make a bench</h3>
@@ -93,7 +98,8 @@ bench.add_lens("AC254-050-A", front_z_mm=250)
 bench.plot("ray_diagram")
 #figure api-ray-diagram
 </ipython>
-<p><code>move_lens</code> behaves like a drag: lenses cannot overlap. Snapshots do not update, so read
+<p><code>move_lens</code> behaves like a drag: lenses stop at their neighbours, and swap places if pushed past them.
+Snapshots do not update, so read
 <code>bench.lenses</code> again after an edit.</p>
 <ipython>
 bench.move_lens(1, front_z_mm=245).front_z_mm
@@ -117,8 +123,84 @@ bench.delete_lens(1)
 len(bench.lenses)
 </ipython>
 
+<p>A snapshot also describes the part and the air behind it:</p>
+<ipython>
+lens = Bench().lenses[0]
+
+lens.part_number, lens.vendor, lens.focal_length_mm, lens.clear_diameter_mm
+
+lens.surface_range, lens.gap_after_mm, lens.gap_after_locked
+</ipython>
+
+<h2 id="gaps">Gaps and the source plane</h2>
+<p>A gap is measured vertex to vertex: from the back of a lens to the front of the next one, or to the image plane
+behind the last. <code>set_gap</code> types a gap, as in the window: all later lenses and the image plane shift
+together, so no other gap changes.</p>
+<ipython>
+bench = Bench(empty=True)
+
+bench.add_lens("AC254-100-A");
+bench.add_lens("AC254-050-A");
+
+bench.set_gap(0, 130).gap_after_mm
+
+[lens.front_z_mm for lens in bench.lenses]
+</ipython>
+<p>A locked gap keeps its length. Lenses joined by locked gaps move together.</p>
+<ipython>
+bench.lock_gap(0).gap_after_locked
+
+bench.move_lens(0, front_z_mm=120);
+
+[lens.front_z_mm for lens in bench.lenses]
+
+bench.set_gap(0, 100)  # raises
+
+bench.lock_gap(0, locked=False);
+</ipython>
+<p>The <b>source plane</b> is where every field&rsquo;s diameter, offset, angle and vergence are defined: a light source, a
+scan mirror or a stop. By default it is locked to the first lens, 0&nbsp;mm in front of it. Unlock it to set the
+distance.</p>
+<ipython>
+bench.source_gap_mm, bench.source_gap_locked
+
+bench.lock_source_gap(False)
+
+bench.set_source_gap(50)
+
+bench.source_z_mm, bench.lenses[0].front_z_mm
+</ipython>
+<p><code>set_source_z</code> moves the source plane itself, leaving the lenses where they are.</p>
+
+<h2 id="assemblies">Assemblies and user parts</h2>
+<p>An <b>assembly</b> is a run of neighbouring lenses that moves and flips as one. The gaps inside it are locked. Save
+one as a <b>user part</b> and you can insert it into any design.</p>
+<ipython>
+relay = Bench(empty=True)
+
+relay.add_paraxial_lens(100);
+relay.add_paraxial_lens(100);
+relay.set_gap(0, 200);
+
+relay.make_assembly(0, 1, name="4f relay")
+
+[(lens.assembly, lens.assembly_name) for lens in relay.lenses]
+
+relay.save_user_part(0, "4f relay", overwrite=True)
+
+relay.user_parts()
+
+other = Bench(empty=True)
+
+[lens.front_z_mm for lens in other.insert_user_part("4f relay", front_z_mm=60)]
+</ipython>
+<p>User parts are small files in your own application-data folder (this page&rsquo;s examples use a temporary one), so
+they are shared between designs. <code>flip_assembly</code> turns an assembly round, and <code>split_assembly</code>
+dissolves it.</p>
+
 <h3>Plössl pairs</h3>
-<p>Two identical positive lenses that are close together can be snapped into a pair, which then moves as one.</p>
+<p>Two identical positive catalogue lenses that are close together can be snapped into a Plössl pair, which is an
+assembly.</p>
 <ipython>
 pair = Bench(empty=True)
 
@@ -127,18 +209,19 @@ pair.add_lens("AC254-100-A");
 
 pair.make_plossl(0)
 
-[(lens.front_z_mm, lens.flipped, lens.plossl_group) for lens in pair.lenses]
+[(lens.front_z_mm, lens.flipped, lens.assembly_name) for lens in pair.lenses]
 
 pair.plot("ray_diagram")
 #figure api-plossl
 
-pair.split_plossl(0)
+pair.split_assembly(0)
 
-[lens.plossl_group for lens in pair.lenses]
+[lens.assembly_name for lens in pair.lenses]
 </ipython>
 
 <h2 id="fields">Fields (beams)</h2>
-<p><code>set_field</code> changes only what you pass. <code>add_field</code> copies the selected field, applies your
+<p>A field&rsquo;s diameter, offset, angle and vergence are those at the <a href="#gaps">source plane</a>.
+<code>set_field</code> changes only what you pass. <code>add_field</code> copies the selected field, applies your
 changes and selects the new one.</p>
 <ipython>
 bench = Bench(empty=True)
@@ -319,20 +402,46 @@ it in the side view. Here lens 1 is selected.</p>
 </ipython>
 
 <h2 id="files">Files and reports</h2>
-<p>Save and load Zemax <code>.zmx</code> files, and write the HTML report. <code>load_zmx</code> returns a list of notes on
-anything RayCrafter simplified. See <a href="lens-model.html">how lenses differ from Zemax</a>.</p>
+<p>A <b>project file</b> (<code>.raycrafter</code>) keeps the whole design. Save to one to keep your work.</p>
 <ipython>
+bench = Bench(empty=True)
+
+bench.add_lens("AC254-100-A");
+bench.add_lens("AC254-050-A", front_z_mm=250);
+bench.add_field(angle_deg=1);
+
 bench.has_unsaved_changes
 
+bench.save_project("reducer")
+
+bench.has_unsaved_changes
+
+again = Bench.from_project("reducer.raycrafter")
+
+len(again.lenses), len(again.fields)
+</ipython>
+<p>Zemax <code>.zmx</code> files are for exchanging designs with other programs. Exporting one does not count as saving,
+because it <a href="files.html#export">cannot hold everything</a>. <code>load_zmx</code> imports a file and returns a
+list of notes on anything RayCrafter simplified (see <a href="lens-model.html">how lenses differ from Zemax</a>). The
+design remembers which file it was imported from.</p>
+<ipython>
 bench.save_zmx("reducer.zmx")
 
-bench.has_unsaved_changes
+imported = Bench.from_zmx("reducer.zmx")
 
-reloaded = Bench.from_zmx("reducer.zmx")
+imported.imported_from, imported.modified_since_import
 
-[lens.part_number for lens in reloaded.lenses]
+imported.flip_lens(0);
 
-reloaded.load_zmx("reducer.zmx", discard_unsaved=True)
+imported.modified_since_import
+
+notes = imported.load_zmx("reducer.zmx", discard_unsaved=True)
+
+notes
+
+imported.save_project("imported.raycrafter", forget_import=True)  # drop the original ZMX
+
+imported.imported_from
 
 bench.write_report("design.html")  # add open_in_browser=True to view it
 </ipython>
@@ -345,32 +454,48 @@ bench.add_lens("AC999-000-Z")  # raises
 
 bench.flip_lens(7)  # raises
 
-bench.add_lens("LA1509-A");
+bench.lock_gap(1);  # the gap to the image plane
+
+bench.autofocus()  # raises
 
 bench.new_design()  # raises
 </ipython>
 
 <h2 id="reference">Reference</h2>
 <p>The full docstrings are in
-<a href="https://github.com/raycrafter-optical-design/raycrafter/blob/main/raycrafter/api.py"><code>raycrafter/api.py</code></a>,
-or type <code>bench.add_lens?</code> in IPython. Arguments in [brackets] are optional.</p>
+<a href="https://github.com/raycrafter-optical-design/raycrafter/blob/main/raycrafter/api.py"><code>raycrafter/api.py</code></a>
+and, next to it, <code>gap_methods.py</code>, <code>assembly_methods.py</code> and <code>design_files.py</code>. Or type
+<code>bench.add_lens?</code> in IPython. Arguments in [brackets] are optional.</p>
 <div class="table"><table>
 <tr><th>Create</th><th></th></tr>
 <tr><td><code>Bench([empty])</code></td><td>Headless bench</td></tr>
 <tr><td><code>Bench.connect([endpoint_path])</code></td><td>Drive the open window</td></tr>
-<tr><td><code>Bench.from_zmx(file_path)</code></td><td>Headless bench from a file</td></tr>
+<tr><td><code>Bench.from_project(file_path)</code></td><td>Headless bench from a project file</td></tr>
+<tr><td><code>Bench.from_zmx(file_path)</code></td><td>Headless bench from a Zemax file</td></tr>
 <tr><th>Read</th><th></th></tr>
 <tr><td><code>catalog</code>, <code>search_lenses([query, min_focal_length_mm, max_focal_length_mm, min_diameter_mm, category])</code></td><td>Catalogue entries</td></tr>
 <tr><td><code>lenses</code>, <code>fields</code></td><td>Lists of <code>LensInfo</code>, <code>FieldInfo</code></td></tr>
 <tr><td><code>image_z_mm</code>, <code>selected_field_index</code></td><td>Image plane, selected field</td></tr>
+<tr><td><code>source_z_mm</code>, <code>source_gap_mm</code>, <code>source_gap_locked</code></td><td>Source plane</td></tr>
 <tr><td><code>is_connected</code>, <code>has_unsaved_changes</code></td><td>Booleans</td></tr>
+<tr><td><code>project_path</code>, <code>imported_from</code>, <code>modified_since_import</code></td><td>Where the design came from</td></tr>
 <tr><td><code>state()</code></td><td>Copy of the whole design</td></tr>
 <tr><th>Lenses</th><th></th></tr>
 <tr><td><code>add_lens(part_number, [front_z_mm])</code></td><td>Add a catalogue lens</td></tr>
 <tr><td><code>add_paraxial_lens(focal_length_mm, [front_z_mm])</code></td><td>Add an ideal thin lens</td></tr>
 <tr><td><code>move_lens(lens_index, front_z_mm)</code></td><td>Move, as by dragging</td></tr>
 <tr><td><code>flip_lens(lens_index)</code>, <code>delete_lens(lens_index)</code></td><td>Turn round, remove</td></tr>
-<tr><td><code>make_plossl(lens_index)</code>, <code>split_plossl(lens_index)</code></td><td>Pair, unpair</td></tr>
+<tr><th>Gaps and source plane</th><th></th></tr>
+<tr><td><code>set_gap(lens_index, gap_mm)</code></td><td>Set the gap behind a lens</td></tr>
+<tr><td><code>lock_gap(lens_index, [locked])</code></td><td>Lock or unlock it</td></tr>
+<tr><td><code>set_source_gap(gap_mm)</code>, <code>lock_source_gap([locked])</code></td><td>Gap in front of the first lens</td></tr>
+<tr><td><code>set_source_z(source_z_mm)</code></td><td>Move the source plane</td></tr>
+<tr><th>Assemblies and user parts</th><th></th></tr>
+<tr><td><code>make_assembly(first_lens_index, last_lens_index, [name])</code></td><td>Group neighbouring lenses</td></tr>
+<tr><td><code>flip_assembly(lens_index)</code>, <code>split_assembly(lens_index)</code></td><td>Turn round, dissolve</td></tr>
+<tr><td><code>make_plossl(lens_index)</code></td><td>Make a Plössl pair</td></tr>
+<tr><td><code>save_user_part(lens_index, name, [overwrite])</code></td><td>Save an assembly</td></tr>
+<tr><td><code>user_parts()</code>, <code>insert_user_part(name, front_z_mm)</code></td><td>List, insert</td></tr>
 <tr><th>Fields and image plane</th><th></th></tr>
 <tr><td><code>set_field(field_index, [diameter_mm, angle_deg, vergence_dioptres, offset_mm, wavelength_nm, colour])</code></td><td>Change a field</td></tr>
 <tr><td><code>add_field([...])</code></td><td>Copy the selected field, with changes</td></tr>
@@ -383,7 +508,9 @@ or type <code>bench.add_lens?</code> in IPython. Arguments in [brackets] are opt
 <tr><td><code>plot(kind, [field_index])</code></td><td>matplotlib <code>Figure</code></td></tr>
 <tr><th>Files</th><th></th></tr>
 <tr><td><code>new_design([discard_unsaved])</code></td><td>Start again</td></tr>
-<tr><td><code>load_zmx(file_path, [discard_unsaved])</code>, <code>save_zmx(file_path)</code></td><td>Zemax files</td></tr>
+<tr><td><code>save_project([file_path, forget_import])</code></td><td>Save the whole design</td></tr>
+<tr><td><code>load_project(file_path, [discard_unsaved])</code></td><td>Open a project</td></tr>
+<tr><td><code>load_zmx(file_path, [discard_unsaved])</code>, <code>save_zmx(file_path)</code></td><td>Import, export Zemax files</td></tr>
 <tr><td><code>write_report(file_path, [open_in_browser])</code></td><td>HTML report</td></tr>
 </table></div>
 </main>

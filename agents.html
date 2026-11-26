@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI agents · RayCrafter docs</title>
+<meta name="description" content="Let an AI agent such as Claude design and analyse with RayCrafter through its MCP server.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
+  <a href="python-api.html">Python API</a>
+  <a href="agents.html" class="here">AI agents</a>
+  <a href="lens-model.html">How lenses work (vs Zemax)</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">AI agents</h2>
+<p class="lead">RayCrafter includes an <a href="https://modelcontextprotocol.io">MCP</a> server, so an AI agent such as
+Claude can search for lenses, build and edit a design, and read back the optics.</p>
+
+<h2 id="how">How it works</h2>
+<ul>
+  <li><b>With a RayCrafter window open</b>, the agent controls that window. You watch its changes happen, you can move
+      lenses yourself and ask the agent about the result, and you can undo its edits (but not its starting or opening of
+      another design). The status bar shows <i>AI agent link on</i> and names each action.</li>
+  <li><b>With no window open</b>, the agent works on a design of its own, with no picture.</li>
+  <li>Every result says which of the two it came from.</li>
+</ul>
+
+<h2 id="install">1. Install the MCP extra</h2>
+<p>With pip:</p>
+<pre><code>pip install "raycrafter[mcp]"</code></pre>
+<p>Or with <a href="install.html">uv</a>, which installs both <code>raycrafter</code> and <code>raycrafter-mcp</code>:</p>
+<pre><code>uv tool install "raycrafter[mcp]"</code></pre>
+<p>With uv you can also install nothing and let it fetch RayCrafter when needed (see below).</p>
+
+<h2 id="configure">2. Tell your AI app where it is</h2>
+<h3>Claude desktop app</h3>
+<p>Open <b>Settings → Developer → Edit Config</b>. This opens <code>claude_desktop_config.json</code> (in
+<code>~/Library/Application Support/Claude/</code> on macOS, <code>%APPDATA%\Claude\</code> on Windows). Add RayCrafter
+under <code>mcpServers</code>, then quit and reopen the app:</p>
+<pre><code>{
+  "mcpServers": {
+    "raycrafter": {
+      "command": "/full/path/to/raycrafter-mcp"
+    }
+  }
+}</code></pre>
+<p>Write the path in full: the app does not expand <code>~</code> and may not see the same <code>PATH</code> as your
+terminal. Find it with <code>which raycrafter-mcp</code> (macOS, Linux) or <code>where raycrafter-mcp</code>
+(Windows).</p>
+<p>If you use uv and installed nothing, use this instead (find the path with <code>which uvx</code>):</p>
+<pre><code>{
+  "mcpServers": {
+    "raycrafter": {
+      "command": "/full/path/to/uvx",
+      "args": ["--from", "raycrafter[mcp]", "raycrafter-mcp"]
+    }
+  }
+}</code></pre>
+<h3>Claude Code and other MCP clients</h3>
+<pre><code>claude mcp add raycrafter -- raycrafter-mcp</code></pre>
+<p>Other clients take the same command.</p>
+
+<h2 id="use">3. Ask for something</h2>
+<p>Start RayCrafter, then ask in plain words, for example:</p>
+<ul>
+  <li>&ldquo;Build a 2:1 beam reducer from 1 inch achromats and tell me how good the output is.&rdquo;</li>
+  <li>&ldquo;Which way round should this plano-convex lens go?&rdquo;</li>
+  <li>&ldquo;I have moved the second lens. What happened to the spot size?&rdquo;</li>
+</ul>
+<div class="note warn"><p><b>Check what it tells you.</b> Agents make mistakes, and RayCrafter is pre-alpha. Save your
+work first.</p></div>
+
+<h2 id="tools">What an agent can do</h2>
+<div class="table"><table>
+<tr><td>Look</td><td>Read the design, search the catalogue, read spot sizes, focal lengths, MTF, ray fan, through-focus and
+field curvature, and see any plot as a picture</td></tr>
+<tr><td>Lenses</td><td>Add, insert, move, flip and delete; set and lock gaps and the source plane</td></tr>
+<tr><td>Assemblies</td><td>Make, split and flip assemblies and Plossl pairs; save, list and insert user parts</td></tr>
+<tr><td>Beams and focus</td><td>Add, change and remove fields; move the image plane; autofocus</td></tr>
+<tr><td>Files</td><td>New design, save and open projects, import and export Zemax files</td></tr>
+</table></div>
+<p>Agents cannot undo. They can read and write design files anywhere your user account can. Starting, opening or
+importing a design is refused while there are unsaved changes, unless the agent says to discard them.</p>
+
+<h2 id="privacy">The link to the window</h2>
+<p>The window listens only on your own computer. So that the server can find it, it writes a file in
+<code>~/.raycrafter</code>, readable only by you, holding the port and a random token. The
+<a href="python-api.html#window">Python API</a> uses the same link. To turn it off, start RayCrafter with:</p>
+<pre><code>raycrafter --no-agent-link</code></pre>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>

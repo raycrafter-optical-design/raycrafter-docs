@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Files and reports · RayCrafter docs</title>
+<meta name="description" content="RayCrafter project files, Zemax import and export, user parts and HTML reports.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><b>RayCrafter</b><span>documentation</span></div>
+  <p>Simple ray tracing with off-the-shelf optics. Very early software: expect rough edges.</p>
+</header>
+<div class="wrap">
+<nav>
+  <b>Pages</b>
+  <a href="index.html">What is RayCrafter?</a>
+  <a href="install.html">Install and start</a>
+  <a href="tour.html">A tour</a>
+  <a href="files.html" class="here">Files and reports</a>
+  <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
+  <a href="lens-model.html">How lenses work (vs Zemax)</a>
+  <a href="known-problems.html">Known problems</a>
+  <b>Links</b>
+  <a href="https://github.com/raycrafter-optical-design/raycrafter">Source on GitHub</a>
+  <a href="https://pypi.org/project/raycrafter/">PyPI</a>
+</nav>
+<main>
+<h2 style="margin-top:10px">Files and reports</h2>
+<p class="lead">Save your work as a RayCrafter project. Use Zemax files to exchange designs with other programs.</p>
+
+<h2 id="projects">Project files</h2>
+<p><b>File → Save</b> and <b>Save As</b> write a project file, ending in <code>.raycrafter</code>; <b>File → Open</b>
+reads one back. A project keeps the whole design: every lens with its full prescription, all fields, assemblies, locked
+gaps, the source and image planes and, for an imported design, the original Zemax file. (The <b>Lock focus</b> tick box
+is not saved.) Because each lens is stored in full, a later change to the catalogue does not change a saved design.</p>
+<p>The window title shows the project&rsquo;s name and marks unsaved changes. RayCrafter asks before New, Open, Import or
+Quit would throw changes away.</p>
+<div class="note warn"><p><b>The format may change</b> while RayCrafter is pre-alpha. A file written by a newer format
+version than your RayCrafter understands is refused.</p></div>
+
+<h2 id="import">Importing Zemax files</h2>
+<p><b>File → Import ZMX</b> replaces the design with the system in a <code>.zmx</code> file. RayCrafter works with whole
+lenses, so the import is not exact: a dialog lists whatever was simplified. Read it. See
+<a href="lens-model.html">how lenses work compared with Zemax</a> for what changes and what cannot be loaded.</p>
+<ul class="problems">
+  <li><b>The original file is kept.</b> When you save the project, it contains an exact copy of the ZMX file, the import
+      notes and the design as it was first imported. This lets you see where a design came from, and lets a better importer
+      read it again later. (Re-importing from the program is not possible yet.)</li>
+  <li><b>The title says whether you have changed it</b>, for example &ldquo;Untitled (imported from lens.zmx,
+      modified)&rdquo;.</li>
+  <li><b>Before you share a project</b>, remember the original file is inside it. <b>File → Save Without Original
+      ZMX</b> saves a project without that record; the design then no longer counts as imported.</li>
+</ul>
+
+<h2 id="export">Exporting to Zemax</h2>
+<p><b>File → Export ZMX</b> writes a <code>.zmx</code> file. It does <b>not</b> save your design, because a ZMX file cannot
+hold all of it:</p>
+<ul>
+  <li>The beam width and vergence come from the selected field only. Every field angle and wavelength is written, but
+      offsets and colours are not.</li>
+  <li>Assemblies, locked gaps and part details are not recorded.</li>
+</ul>
+<div class="note warn"><p><b>Exported files currently look wrong in Zemax</b> (<a href="https://github.com/raycrafter-optical-design/raycrafter/issues/9">#9</a>).
+Do not rely on them yet.</p></div>
+
+<h2 id="parts">User parts</h2>
+<p>A <a href="tour.html#assemblies">user part</a> is a saved assembly. Each is a small <code>.raycrafter-part</code> file in
+your own data folder, so it is available in every design:</p>
+<div class="table"><table>
+<tr><td>macOS</td><td><code>~/Library/Application Support/RayCrafter/parts</code></td></tr>
+<tr><td>Windows</td><td><code>%APPDATA%\RayCrafter\parts</code></td></tr>
+<tr><td>Linux</td><td><code>~/.local/share/raycrafter/parts</code></td></tr>
+</table></div>
+<p>To share a part, copy its file into someone else&rsquo;s folder. RayCrafter cannot yet rename or delete parts
+(<a href="https://github.com/raycrafter-optical-design/raycrafter/issues/62">#62</a>). To delete one, delete its file.</p>
+
+<h2 id="report">HTML report</h2>
+<p><b>Generate report</b> writes a single HTML page about the current design and opens it in your web browser: the
+first-order numbers, the ray diagram, spot diagram, through-focus curve, MTF, ray fan and field curvature. Click the
+<b>?</b> beside a plot for an explanation of what it shows. The report goes in your computer&rsquo;s temporary folder, so
+save a copy from the browser if you want to keep it.</p>
+</main>
+</div>
+<footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>
+</body>
+</html>

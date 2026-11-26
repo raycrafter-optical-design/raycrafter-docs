@@ -11,6 +11,8 @@ Directives, each on its own line inside a block:
     #screenshot NAME   save pictures of the window (NAME.png) and its Bench list, if open
     #bench-viewer      open the window's "Bench" list and select the second lens, as a user would
 
+User parts saved by the examples go to a demo folder, not to your own parts folder.
+
 Run from the RayCrafter repository so that its environment (plus IPython) is used:
 
     cd path/to/raycrafter
@@ -36,6 +38,15 @@ from traitlets.config import Config
 DOCS = Path(__file__).resolve().parent.parent
 SOURCE = DOCS / "scripts" / "api_page_source.html"
 WINDOW_TIMEOUT_S = 120
+# A fixed, tidy working folder, because some outputs show full paths.
+DEMO_DIR = Path("/tmp/raycrafter-demo")
+
+
+def use_demo_parts_folder() -> None:
+    """Keep user parts in the demo folder, so the examples never touch the real ones."""
+    from raycrafter.core import user_parts
+
+    user_parts.default_parts_folder = lambda: DEMO_DIR / "parts"
 
 
 def run_window(work_dir: Path) -> None:
@@ -51,6 +62,7 @@ def run_window(work_dir: Path) -> None:
     from raycrafter.gui.main_window import MainWindow
     from raycrafter.gui.style import force_light_colour_scheme
 
+    use_demo_parts_folder()
     app = QApplication(sys.argv)
     force_light_colour_scheme(app)
     window = MainWindow()
@@ -211,10 +223,9 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         work_dir = Path(temporary)
         os.environ["RAYCRAFTER_LINK_FILE"] = str(work_dir / "agent_link.json")
-        # A fixed, tidy working folder, because some outputs show full paths.
-        demo_dir = Path("/tmp/raycrafter-demo")
-        demo_dir.mkdir(exist_ok=True)
-        os.chdir(demo_dir)
+        DEMO_DIR.mkdir(exist_ok=True)
+        os.chdir(DEMO_DIR)
+        use_demo_parts_folder()
         for old in (DOCS / "img").glob("api-*.png"):
             old.unlink()
         session = Session(work_dir)

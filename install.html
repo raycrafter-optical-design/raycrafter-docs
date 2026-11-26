@@ -18,7 +18,9 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html" class="here">Install and start</a>
   <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html">How lenses work (vs Zemax)</a>
   <a href="known-problems.html">Known problems</a>
   <b>Links</b>
@@ -66,6 +68,13 @@ compiling its maths code. It tells you when this is happening. The result is sav
 <p>To start it again later, open a new Terminal or PowerShell window and type <code>uvx raycrafter</code> again.
 To make sure you have the newest release, use <code>uvx raycrafter@latest</code>. To stop RayCrafter from the
 terminal, press <b>Ctrl+C</b> in that window.</p>
+
+<h2 id="pip">If you already use Python</h2>
+<p>RayCrafter is on <a href="https://pypi.org/project/raycrafter/">PyPI</a> and needs Python 3.12 or later:</p>
+<pre><code>pip install raycrafter
+raycrafter</code></pre>
+<p>This also gives you the <a href="python-api.html">Python API</a>. To let AI agents use RayCrafter, install the extra
+described on the <a href="agents.html">AI agents</a> page.</p>
 
 <h2 id="main">Try the newest version (from GitHub)</h2>
 <p>The version on PyPI is the released one. The <code>main</code> branch on GitHub can have newer changes that are not

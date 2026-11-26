@@ -18,7 +18,9 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html" class="here">How lenses work (vs Zemax)</a>
   <a href="known-problems.html">Known problems</a>
   <b>Links</b>
@@ -35,7 +37,7 @@ later. This page explains it, because it is the main reason a design can give di
 <h2 id="model">The design choice</h2>
 <ul class="problems">
   <li><b>Every lens has a rim, and the rim blocks rays.</b> Whatever you do in RayCrafter (pick a catalogue lens, drag it,
-      load a file), a ray that reaches a lens outside its clear diameter is lost. The side view draws each lens at that
+      import a file), a ray that reaches a lens outside its clear diameter is lost. The side view draws each lens at that
       size, so what you see is what is traced.</li>
   <li><b>Zemax does not work this way.</b> It blocks rays only at surfaces that have an aperture (circular, floating or
       rectangular). A surface's semi-diameter (<code>DIAM</code>) only sets the size it is <em>drawn</em>; rays outside it
@@ -49,11 +51,11 @@ later. This page explains it, because it is the main reason a design can give di
 </ul>
 
 <h2 id="size">Where a lens's size comes from</h2>
-<p>A catalogue lens has its catalogue size. For a lens loaded from a file, the size is, in order: the aperture in the
+<p>A catalogue lens has its catalogue size. For a lens imported from a file, the size is, in order: the aperture in the
 file, the catalogue size if the lens is recognised, or the drawn semi-diameter (<code>DIAM</code>). RayCrafter does not
-widen a lens to match Zemax; after loading, it adds a note for each lens that now blocks rays Zemax lets through.</p>
+widen a lens to match Zemax; after importing, it adds a note for each lens that now blocks rays Zemax lets through.</p>
 
-<h2 id="loading">What this means when loading a Zemax file</h2>
+<h2 id="loading">What this means when importing a Zemax file</h2>
 <ul class="problems">
   <li><b>Lenses are grouped from surfaces.</b> A lens is a run of surfaces with glass between them, ending at the first
       surface followed by air. Each glass lens is looked up in the lens catalogue, so a vendor lens comes back with its
@@ -67,16 +69,21 @@ widen a lens to match Zemax; after loading, it adds a note for each lens that no
 <h2 id="fields">Fields</h2>
 <p>Zemax gives every field the same entrance pupil and object, and pairs every field angle with every wavelength.
 RayCrafter makes one field for each field angle at the primary wavelength, and one on-axis field for each other
-wavelength. With several angles, each is drawn in its own colour, as in Zemax. When the stop is in air in front of
-the first lens (a scan mirror, for example), each beam's chief ray passes through the centre of the stop; otherwise the
-beams are centred on the first lens. Field x coordinates are dropped, because RayCrafter tilts beams in y only.</p>
+wavelength. With several angles, each is drawn in its own colour, as in Zemax. Field x coordinates are dropped, because
+RayCrafter tilts beams in y only.</p>
+<p>When the stop is in air in front of the first lens (a scan mirror, for example), the
+<a href="tour.html#source">source plane</a> is put at the stop, so each beam&rsquo;s chief ray passes through its centre.
+Otherwise the source plane is at the first lens and the beams are centred on it. Either way the gap from the source plane
+is locked, so moving the first lens carries the beams with it. If the stop is behind the first lens, angled beams are not
+aimed through it, and a note says so.</p>
 
 <h2 id="unsupported">Not supported yet</h2>
-<p>Aspheres, conics, mirrors, tilts and decentres are not supported: a file that contains them does not load.
-Glasses without a catalogue name (model glasses) are reported in a note.</p>
+<p>Aspheres, conics, mirrors (and so folded paths), tilts and decentres are not supported: a file that contains them does
+not import. Nor does a file with a glass that has no catalogue name (a model glass).</p>
 
-<h2 id="saving">Saving</h2>
-<p>A ZMX file cannot hold everything RayCrafter does; see <a href="known-problems.html">known problems</a>.</p>
+<h2 id="saving">Keeping and exporting</h2>
+<p>An imported design is saved as a RayCrafter <a href="files.html#projects">project</a>, which keeps the original ZMX file.
+Exporting back to Zemax is <a href="files.html#export">lossy</a>.</p>
 </main>
 </div>
 <footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>

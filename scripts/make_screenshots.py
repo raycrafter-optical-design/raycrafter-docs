@@ -12,9 +12,9 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
 
-from raycrafter.gui.style import force_light_colour_scheme
-from raycrafter.gui.main_window import MainWindow
 from raycrafter.gui.lens_picker import LensPickerDialog
+from raycrafter.gui.main_window import MainWindow
+from raycrafter.gui.style import force_light_colour_scheme
 
 
 def settle(app: QApplication, window: MainWindow) -> None:
@@ -33,14 +33,13 @@ def save(widget, output_dir: Path, name: str) -> None:
     print("wrote", name)
 
 
-def main(output_dir: Path) -> None:
-    app = QApplication(sys.argv)
-    force_light_colour_scheme(app)
-
+def main_window_pictures(app: QApplication, output_dir: Path) -> None:
+    """The main window with two achromats and two fields, and its smaller windows."""
     window = MainWindow()
     window.model.delete_lens(0)  # start from an empty bench
     window.model.add_lens("AC254-100-A")
     window.model.add_lens("AC254-050-A")
+    window.model.set_gap(0, 30.0)
     second_field = window.model.add_field()
     second_field.angle_deg = 3.0
     second_field.colour = "#d62728"
@@ -57,15 +56,46 @@ def main(output_dir: Path) -> None:
     save(window, output_dir, "through-focus")
 
     window.open_field_editor()
-    window.field_editor.add_button_for_screenshot = None
     settle(app, window)
     save(window.field_editor, output_dir, "field-window")
+    window.field_editor.close()
+
+    window.open_bench_viewer()
+    settle(app, window)
+    save(window.bench_viewer, output_dir, "bench-viewer")
 
     picker = LensPickerDialog(window.model.catalog, parent=window)
     picker.search_box.setText("AC254-1")
     picker.show()
     app.processEvents()
     save(picker, output_dir, "lens-picker")
+
+
+def gap_pictures(app: QApplication, output_dir: Path) -> None:
+    """The side view with a source plane, a Plossl pair and a locked gap."""
+    window = MainWindow()
+    model = window.model
+    model.delete_lens(0)
+    model.add_lens("AC254-200-A")
+    model.add_lens("AC254-150-A")
+    model.add_lens("AC254-150-A")
+    model.set_gap(0, 70.0)
+    model.make_plossl(1)
+    model.set_source_gap_locked(False)
+    model.set_source_gap(60.0)
+    model.autofocus()
+    model.set_gap_locked(2, True)  # the gap to the image plane
+    window.side_view.rebuild_lens_graphics()
+    window.show()
+    settle(app, window)
+    save(window.side_view, output_dir, "gaps")
+
+
+def main(output_dir: Path) -> None:
+    app = QApplication(sys.argv)
+    force_light_colour_scheme(app)
+    main_window_pictures(app, output_dir)
+    gap_pictures(app, output_dir)
 
 
 if __name__ == "__main__":

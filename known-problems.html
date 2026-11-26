@@ -18,7 +18,9 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html">How lenses work (vs Zemax)</a>
   <a href="known-problems.html" class="here">Known problems</a>
   <b>Links</b>
@@ -27,42 +29,45 @@
 </nav>
 <main>
 <h2 style="margin-top:10px">Known problems</h2>
-<p class="lead">RayCrafter is pre-alpha. These are the known problems at the time of writing (v0.0.2); the current list
+<p class="lead">RayCrafter is pre-alpha. These are the known problems in v0.0.4 at the time of writing; the current list
 is on GitHub under the
 <a href="https://github.com/raycrafter-optical-design/raycrafter/issues?q=is%3Aissue+state%3Aopen+label%3A%22known+problem%22">known problem</a> label.</p>
 
-<h2>Saving to Zemax</h2>
+<h2>Zemax files</h2>
 <ul class="problems">
-  <li><b>Saved ZMX files look wrong when opened in Zemax.</b> Even a single achromat appears with very thick, elongated
-      surfaces. Do not rely on exported files looking right in Zemax yet. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/9">#9</a></li>
-  <li><b>Fields do not survive a save and load.</b> A ZMX file holds one aperture, one object distance, and a list of angles
-      and wavelengths, so RayCrafter's per-field widths, vergences, offsets and colours are lost, and the fields that come back are not the ones saved.
-      Loading shows a dialog listing the simplifications. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/11">#11</a></li>
-  <li><b>Plossl pairs come back as two separate lenses.</b> The optics are right, but dragging one lens no longer moves the other.
-      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/12">#12</a></li>
+  <li><b>Exported ZMX files look wrong when opened in Zemax.</b> Even a single achromat appears with very thick, elongated surfaces. Do not rely on exported files yet. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/9">#9</a></li>
+  <li><b>Fields do not survive a ZMX export and import.</b> A ZMX file holds one aperture, one object distance, and a list of angles and wavelengths, so per-field widths, vergences, offsets and colours are lost. Save a project to keep them. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/11">#11</a></li>
+  <li><b>Assemblies come back as separate lenses.</b> This includes Plossl pairs. The optics are right, but the lenses no longer move as one. Save a project to keep them. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/12">#12</a></li>
+  <li><b>Apertures in air are not modelled.</b> Baffles and cube faces in an imported file are left out, with a note, so RayCrafter may pass rays that Zemax blocks. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/22">#22</a></li>
+  <li><b>Rectangular apertures become circles.</b> An imported rectangular aperture is replaced by the circle that fits inside it, so rays near the corners are blocked. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/23">#23</a></li>
+  <li><b>Folded paths are not supported.</b> Files with mirrors do not import, and folded paths cannot be built. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/60">#60</a></li>
+</ul>
+
+<h2>Building a design</h2>
+<ul class="problems">
+  <li><b>Concave lenses can be made to overlap.</b> Dragging or placing lenses stops their centres crossing, but concave surfaces can still overlap towards the rim. Typing a gap refuses such values. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/58">#58</a></li>
+  <li><b>User parts cannot be renamed or deleted from RayCrafter.</b> Delete the part&rsquo;s <a href="files.html#parts">file</a> instead. Renaming the file does not rename the part. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/62">#62</a></li>
+  <li><b>Mount type is unknown for most catalogue lenses.</b> Unknown does not mean unmounted. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/59">#59</a></li>
 </ul>
 
 <h2>Accuracy of the analysis</h2>
 <ul class="problems">
-  <li><b>The MTF ignores a field's offset.</b> Spot diagrams and ray fans include the offset; the MTF is calculated as if it were 0.
-      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/10">#10</a></li>
-  <li><b>Side view draws some totally internally reflected rays wrongly.</b> They are drawn running on to the lens edge rather than stopping.
-      This affects the drawing only. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/16">#16</a></li>
+  <li><b>Collimated (afocal) output is handled poorly.</b> Focal lengths show as infinite, and Autofocus and Lock focus move the image plane to a meaningless position. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/57">#57</a></li>
+  <li><b>The MTF ignores a field&rsquo;s offset.</b> Spot diagrams and ray fans include it; the MTF is calculated as if the offset at the first lens were 0. This includes the offset an angled beam picks up between the source plane and the lens. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/10">#10</a></li>
+  <li><b>Side view draws some totally internally reflected rays wrongly.</b> They are drawn running on to the lens edge rather than stopping. This affects the drawing only. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/16">#16</a></li>
 </ul>
 
 <h2>Internal issues</h2>
 <p>These are about the code rather than what you see, but they may affect speed or reliability.</p>
 <ul class="problems">
-  <li><b>Extra work while editing fields.</b> Holding an arrow on a field-window spin box makes updates roughly twice as slow as needed.
-      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/13">#13</a></li>
-  <li><b>MTF workaround for an Optiland error.</b> The code that catches an Optiland error could hide other errors.
-      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/14">#14</a></li>
-  <li><b>Unsaved-change tracking is in the interface, not the core model</b>, so scripts cannot ask whether a design is saved.
-      <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/15">#15</a></li>
+  <li><b>Extra work while editing fields.</b> Holding an arrow on a field-window spin box makes updates roughly twice as slow as needed. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/13">#13</a></li>
+  <li><b>MTF workaround for an Optiland error.</b> The code that catches an Optiland error could hide other errors. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/14">#14</a></li>
+  <li><b>Code layout.</b> The Python API depends on code kept in the package for the AI agent server. <a href="https://github.com/raycrafter-optical-design/raycrafter/issues/33">#33</a></li>
 </ul>
 
 <h2>Reporting a problem</h2>
-<p>Please <a href="https://github.com/raycrafter-optical-design/raycrafter/issues">open an issue</a> with what you did, what you expected, and what happened.</p>
+<p>Please <a href="https://github.com/raycrafter-optical-design/raycrafter/issues">open an issue</a> with what you did, what you expected, and what happened. A saved project
+file helps; note that an imported design&rsquo;s project <a href="files.html#import">contains the original ZMX file</a>.</p>
 </main>
 </div>
 <footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>

@@ -18,7 +18,9 @@
   <a href="index.html">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html" class="here">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html">How lenses work (vs Zemax)</a>
   <a href="known-problems.html">Known problems</a>
   <b>Links</b>
@@ -29,12 +31,18 @@
 <h2 style="margin-top:10px">A tour</h2>
 <p class="lead">What is on the screen, and how to use it.</p>
 
+<p>Contents: <a href="#window">The window</a> · <a href="#lenses">Lenses</a> · <a href="#gaps">Gaps and locks</a> ·
+<a href="#assemblies">Assemblies and user parts</a> · <a href="#fields">Fields</a> · <a href="#source">The source plane</a> ·
+<a href="#analysis">Plots</a> · <a href="#bench">Bench list</a> · <a href="#undo">Undo</a> · <a href="#keys">Shortcuts</a></p>
+
 <h2 id="window">The window</h2>
-<p>The top half is the <b>side view</b>: lenses on an optical axis, with rays travelling left to right and a green
-dashed line for the image plane. The bottom row has the control panel on the left, then three groups of plots.
-A line along the bottom gives the image position, RMS spot size, focal length (EFL), back focal length, f-number
-and Airy radius.</p>
+<p>The top half is the <b>side view</b>: lenses on an optical axis, with rays travelling left to right, a brown dashed
+line for the source plane and a green dashed line for the image plane. The distances between them are written along the
+bottom. The lower row has the control panel on the left, then three groups of plots. A line along the bottom gives the
+image position, RMS spot size, focal length (EFL), back focal length, f-number and Airy radius.</p>
 <figure><a href="img/main-window.png" title="Open full size"><img src="img/main-window.png" alt="The main window with two achromats and two fields"></a><figcaption>Two achromatic doublets, with an on-axis beam (green) and a beam at 3° (red).</figcaption></figure>
+<p>A new window starts with one lens, an ACT508-200-A achromat. The <b>File</b> menu starts, opens and saves designs
+(see <a href="files.html">Files and reports</a>), <b>Edit</b> has Undo and Redo, and <b>Help</b> opens these pages.</p>
 
 
 <h2 id="lenses">Adding and moving lenses</h2>
@@ -43,18 +51,70 @@ and Airy radius.</p>
       (for example <code>AC254</code>), or filter by coating and focal length. Select a lens and click <b>Insert</b>.</li>
   <li>Click on the axis to put the lens where you want it. <kbd>Esc</kbd> or right-click cancels.</li>
   <li>Drag a lens along the axis; the plots follow. Drag it past its neighbour to swap their order.</li>
-  <li>Right-click a lens to flip it, delete it, or make a Plossl pair.</li>
+  <li>Right-click a lens to flip or delete it.</li>
   <li>For an ideal lens, set a focal length next to <b>Add paraxial lens</b> and click the button.</li>
-  <li><b>Autofocus</b> moves the image plane to the best-focus position; tick <b>Lock focus</b> to keep it there as you move lenses.</li>
+  <li><b>Autofocus</b> moves the image plane to the best-focus position; tick <b>Lock focus</b> to keep it there as you
+      change the design. You can also drag the green image line.</li>
 </ol>
 <figure class="small"><a href="img/lens-picker.png" title="Open full size"><img src="img/lens-picker.png" alt="The lens picker dialog filtered to AC254-1 achromats"></a><figcaption>The lens picker, searching for AC254-1.</figcaption></figure>
+
+
+<h2 id="gaps">Gaps and locks</h2>
+<p>A <b>gap</b> is the air distance along the axis, from the back of one lens to the front of the next, or from the last
+lens to the image plane.</p>
+<ul>
+  <li><b>Type a gap:</b> click its label, enter the distance and press Return. All later lenses and the image plane shift
+      together, so no other gap changes. A value that would make surfaces overlap, or put the image plane less than
+      1&nbsp;mm behind the last lens, is refused and the smallest allowed value is shown.</li>
+  <li><b>Lock a gap:</b> right-click its label and choose <b>Lock gap</b>. A locked label has a box round it. Lenses joined
+      by locked gaps move as one.</li>
+  <li><b>Lock the gap to the image plane</b> and the image plane moves with the last lens. Autofocus and <b>Lock focus</b>
+      are then unavailable. Likewise, while Lock focus is ticked, that gap cannot be typed or locked.</li>
+</ul>
+<figure><a href="img/gaps.png" title="Open full size"><img src="img/gaps.png" alt="Side view with a source plane, a single lens, a Plossl pair and locked gaps"></a><figcaption>A source plane 60&nbsp;mm in front of the first lens, and a Plossl pair (purple). The boxed gaps are locked.</figcaption></figure>
+
+
+<h2 id="assemblies">Assemblies and user parts</h2>
+<p>An <b>assembly</b> is a group of neighbouring lenses that moves and flips as one. It is drawn in purple.</p>
+<ol class="steps">
+  <li>Put the lenses where you want them relative to each other.</li>
+  <li>Lock the gaps between them.</li>
+  <li>Right-click one of the lenses and choose <b>Make assembly</b>.</li>
+</ol>
+<ul>
+  <li><kbd>F</kbd>, or <b>Flip assembly</b>, turns the whole group round: the order of the lenses is reversed and each one
+      is flipped.</li>
+  <li>The gaps inside an assembly are fixed. <b>Split assembly</b> releases the lenses so you can change them. Deleting
+      one of its lenses also dissolves it.</li>
+  <li><b>Save as user part</b> stores the assembly. The <b>Add user part</b> button then places a copy of it in any
+      design. See <a href="files.html#parts">where parts are kept</a>.</li>
+</ul>
+<h3>Plossl pairs</h3>
+<p>Put two identical positive catalogue lenses next to each other, right-click one and choose <b>Make Plossl</b>. The two
+are turned to face each other and set 1&nbsp;mm apart, and become an assembly. The option is greyed out if the neighbour
+is a different lens or is too far away (more than about two lens thicknesses).</p>
 
 
 <h2 id="fields">Fields (beams)</h2>
 <p>Click <b>Add field</b> to open the field window. Each field is a beam with its own width, angle, vergence,
 offset, wavelength and colour. Use <b>+</b> and <b>−</b> to add and remove fields, and click one to select it. The spot
-diagram and rays show every field; the MTF and ray fan show the selected field.</p>
-<figure class="small"><a href="img/field-window.png" title="Open full size"><img src="img/field-window.png" alt="The field window listing Field 1 and its width, angle, vergence, offset, wavelength and colour"></a><figcaption>The field window.</figcaption></figure>
+diagram and side view show every field. The through-focus, MTF, ray fan and field curvature plots, the f-number and
+Autofocus use the selected field.</p>
+<figure class="small"><a href="img/field-window.png" title="Open full size"><img src="img/field-window.png" alt="The field window listing two fields and the width, angle, vergence, offset, wavelength and colour of the first"></a><figcaption>The field window.</figcaption></figure>
+
+
+<h2 id="source">The source plane</h2>
+<p>A field&rsquo;s width, offset, angle and vergence are those it has at the <b>source plane</b>, which can stand for a
+light source, a scan mirror or a stop. By default it sits at the front of the first lens and moves with it.</p>
+<ul>
+  <li>To place it elsewhere, right-click the <b>source</b> label and unlock it. Then drag the dashed line, or click the
+      gap in front of the first lens and type the distance.</li>
+  <li>Dragging the line moves only the source plane. Typing the gap leaves the source plane where it is and moves the
+      lenses and image plane.</li>
+  <li>While unlocked, the source plane stays put when lenses move, and no lens can be moved in front of it.</li>
+  <li><i>Offset</i> is the height of the beam&rsquo;s centre at the source plane. With an offset of 0, beams at every angle
+      pass through the axis there, as at a scan mirror.</li>
+</ul>
 
 
 <h2 id="analysis">Analysis plots</h2>
@@ -67,13 +127,31 @@ diagram and rays show every field; the MTF and ray fan show the selected field.<
 </ul>
 <p>Fast plots update as you drag. The slower ones (MTF, ray fan, field curvature) fade while you drag and refresh when you stop.</p>
 <figure><a href="img/through-focus.png" title="Open full size"><img src="img/through-focus.png" alt="The window with the through-focus tab selected"></a><figcaption>The Through-focus tab.</figcaption></figure>
+<p><b>Generate report</b> puts all of these in one <a href="files.html#report">HTML page</a>, with explanations.</p>
 
 
-<h2 id="files">Files and reports</h2>
-<p>The <b>File</b> menu can start a new design and save or load Zemax <code>.zmx</code> files. <b>Generate report</b>
-writes an HTML report of the current design. Note that ZMX files cannot hold everything RayCrafter does, and RayCrafter treats some things differently from Zemax; see
-<a href="lens-model.html">how lenses work compared with Zemax</a> and
-<a href="known-problems.html">known problems</a>.</p>
+<h2 id="bench">The Bench list</h2>
+<p><b>View bench</b> lists the lenses (with vendor, size and surface numbers), the fields and the image plane. Click a
+row to highlight that item in the side view. You can delete lenses and fields from here.</p>
+<figure class="small"><a href="img/bench-viewer.png" title="Open full size"><img src="img/bench-viewer.png" alt="The Bench list showing two lenses, two fields and the image plane"></a></figure>
+<p>The numbers in this list are the ones <a href="python-api.html">scripts</a> and <a href="agents.html">AI agents</a>
+use. They start at 0, so the field window&rsquo;s &ldquo;Field 1&rdquo; is field 0 here.</p>
+
+
+<h2 id="undo">Undo and redo</h2>
+<p>Use the <b>Edit</b> menu or the usual keys. One action, such as a whole drag or a typed value, is one step. Starting,
+opening or importing a design clears the history.</p>
+
+
+<h2 id="keys">Shortcuts</h2>
+<div class="table"><table>
+<tr><td><kbd>F</kbd></td><td>Flip the lens, or assembly, under the pointer</td></tr>
+<tr><td><kbd>Delete</kbd> or <kbd>Backspace</kbd></td><td>Delete the lens under the pointer</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>Cancel placing a lens</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Z</kbd></td><td>Undo</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></td><td>Redo</td></tr>
+<tr><td><kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>N</kbd>, <kbd>O</kbd>, <kbd>S</kbd></td><td>New, open, save</td></tr>
+</table></div>
 </main>
 </div>
 <footer>RayCrafter is open source (MIT). The software and these docs were written with the help of AI coding agents (Claude Code), directed by the project's developers.</footer>

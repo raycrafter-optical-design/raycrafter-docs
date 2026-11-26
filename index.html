@@ -18,7 +18,9 @@
   <a href="index.html" class="here">What is RayCrafter?</a>
   <a href="install.html">Install and start</a>
   <a href="tour.html">A tour</a>
+  <a href="files.html">Files and reports</a>
   <a href="python-api.html">Python API</a>
+  <a href="agents.html">AI agents</a>
   <a href="lens-model.html">How lenses work (vs Zemax)</a>
   <a href="known-problems.html">Known problems</a>
   <b>Links</b>
@@ -36,17 +38,40 @@ result update as you move them.</p>
 missing, and anything may change, including file formats. Please check results against other tools before you
 rely on them. See <a href="known-problems.html">known problems</a>.</p></div>
 
-<h2>What it is</h2>
+<p>
+  It is common for custom microscopes to be designed and built around off-the-shelf components and lenses.
+  The optical paths of these systems need to be ray-traced and analysed, but no new lenses need to be designed or optimised.
+  RayCrafter addresses this need, as it works on the lens level rather than the surface level, as is common in software such as Zemax.
+  Furthermore, software such as Zemax is complicated and aimed at optical engineers.
+  Many builders of DIY microscopes are not optical engineers, and so would benefit from software that has a smaller and more tailored subset of features.
+  Finally, RayCrafter is also aimed at being a teaching tool for students new to optical design.
+  Students will be able to play with arrangements of ideal lenses before replacing them with real lenses to see the consequences.
+</p>
+
+<p>
+  RayCrafter aims to fill this gap.
+  It allows designers to freely place lenses on an optical path and immediately see results on spot diagrams, MTF plots, etc.
+  Lenses can be grouped into assemblies and the distances between them locked; optimising those distances is not yet possible.
+  An HTML report summarising the system can be produced and this will include explanatory text to help the user interpret the results.
+</p>
+
+<h2>Current features</h2>
 <ul>
   <li><b>Built around real, off-the-shelf lenses.</b> The full Thorlabs catalogue (spherical lenses, achromats,
       air-spaced doublets, triplets and matched pairs) is built in, plus ideal (paraxial) lenses with a focal length you choose.</li>
   <li><b>Not surface based.</b> You do not enter radii, thicknesses and glasses one surface at a time. You place whole lenses.</li>
   <li><b>Not lens design.</b> RayCrafter does not optimise or invent lenses. It helps you work out how a set of lenses
       you could buy will behave together: spacing, focus, aberrations, image quality.</li>
-  <li><b>Easy to use.</b> Drag lenses, flip them, make Plossl pairs, add beams (fields) with their own width, angle,
-      vergence, offset and wavelength. Plots update live.</li>
+  <li><b>Easy to use.</b> Drag lenses and watch the plots update live. Add beams (fields) with their own width, angle,
+      vergence, offset and wavelength. Undo and redo.</li>
+  <li><b>Exact spacing.</b> <a href="tour.html#gaps">Type the gaps</a> between lenses and lock the ones that should not change.</li>
+  <li><b>Assemblies.</b> <a href="tour.html#assemblies">Group lenses</a> (a Plossl pair, say), move and flip them as one, and
+      save them as parts to use again.</li>
+  <li><b>Files and reports.</b> Save your work as a <a href="files.html">project file</a>, import and export Zemax
+      <code>.zmx</code> files and write an HTML report.</li>
+  <li><b>Scriptable.</b> Use it from <a href="python-api.html">Python</a>, or let an <a href="agents.html">AI agent</a>
+      build and analyse designs while you watch.</li>
   <li><b>Cross platform.</b> Runs on Windows, macOS and Linux.</li>
-  <li><b>Exports.</b> Save and load Zemax <code>.zmx</code> files and write an HTML report.</li>
 </ul>
 
 <h2>Built on Optiland</h2>
@@ -58,6 +83,8 @@ build and understand a lens system rather than design one from scratch.</p>
 <ul>
   <li><a href="install.html">Install and start RayCrafter</a>, with step-by-step instructions for Windows and Mac.</li>
   <li><a href="tour.html">A tour</a> of what is on the screen.</li>
+  <li><a href="files.html">Files and reports</a>.</li>
+  <li>The <a href="python-api.html">Python API</a> and <a href="agents.html">AI agents</a>.</li>
   <li><a href="known-problems.html">Known problems</a>.</li>
 </ul>
 </main>
